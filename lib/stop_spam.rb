@@ -4,8 +4,12 @@ require "redis-namespace"
 
 require "stop_spam/config"
 require "stop_spam/ip"
-require "stop_spam/middleware"
 require "stop_spam/version"
+
+if defined?(::Rails)
+  require "stop_spam/middleware"
+  require "stop_spam/railtie"
+end
 
 module StopSpam
   extend self
