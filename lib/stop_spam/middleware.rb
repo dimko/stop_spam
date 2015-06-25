@@ -7,9 +7,13 @@ module StopSpam
     def call(env)
       if StopSpam.active?
         request = Rack::Request.new(env)
+        ip      = request.ip
 
-        if StopSpam.appears?(request.ip)
-          [ 429, {}, [StopSpam.config.middleware_message] ]
+        if StopSpam.appears?(ip)
+          message = StopSpam.config.middleware_message
+          body    = message.respond_to?(:call) ? message.(request) : message
+
+          [429, {}, [body]]
         else
           @app.call(env)
         end
