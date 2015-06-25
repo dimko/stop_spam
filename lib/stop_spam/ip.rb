@@ -9,12 +9,14 @@ module StopSpam
 
     format :json
 
+    delegate :config, to: :StopSpam
+
     def initialize(id)
       @id = id
     end
 
-    def self.appears?(id)
-      new(id).appears?
+    def self.suspicious?(id)
+      new(id).suspicious?
     end
 
     def frequency
@@ -33,6 +35,10 @@ module StopSpam
 
     def appears
       response['appears']
+    end
+
+    def suspicious?
+      appears? && confidence >= config.minimum_confidence
     end
 
     def appears?

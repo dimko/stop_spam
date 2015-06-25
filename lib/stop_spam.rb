@@ -18,7 +18,8 @@ module StopSpam
   alias_method :appears?, :exists
 
   def process(id)
-    StopSpam::IP.appears?(id) && add(id) if active?
+    return unless active?
+    add(id) if IP.suspicious?(id)
   end
 
   def add(id)
@@ -52,5 +53,6 @@ StopSpam.configure do |config|
   config.active = true
   config.expiration = 1.hour
   config.middleware_message = "StopSpam: blocked"
+  config.minimum_confidence = 5
   config.namespace = "stop:spam"
 end
