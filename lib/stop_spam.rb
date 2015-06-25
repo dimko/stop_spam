@@ -14,7 +14,9 @@ end
 module StopSpam
   extend self
 
-  delegate :exists, to: :redis
+  delegate :del, :exists, to: :redis
+
+  alias_method :remove,   :del
   alias_method :appears?, :exists
 
   def process(id)
