@@ -1,4 +1,6 @@
+require 'forwardable'
 require "time"
+
 require "httparty"
 require "redis-namespace"
 
@@ -14,18 +16,26 @@ end
 module StopSpam
   extend self
 
-  delegate :del, :exists, to: :redis
-
-  alias_method :remove,   :del
-  alias_method :appears?, :exists
-
   def process(id)
-    return unless active?
+    return unless active? && !exclusion?(id)
     add(id) if IP.suspicious?(id)
   end
 
+  def exclusion?(id)
+    config.whitelist.include?(id)
+  end
+
+  def appears?(id)
+    return if exclusion?(id)
+    redis.exists(id)
+  end
+
+  def remove(id)
+    redis.del(id)
+  end
+
   def add(id)
-    redis.setex id, config.expiration, Time.now
+    redis.setex id, config.ban_time, Time.now
     true
   end
 
@@ -53,8 +63,9 @@ end
 
 StopSpam.configure do |config|
   config.active = true
-  config.expiration = 1.hour
-  config.middleware_message = "StopSpam: blocked"
+  config.ban_message = "StopSpam: your IP address is banned"
+  config.ban_time = 86400
   config.minimum_confidence = 5
   config.namespace = "stop:spam"
+  config.whitelist = []
 end

@@ -10,7 +10,7 @@ module StopSpam
         ip      = request.ip
 
         if StopSpam.appears?(ip)
-          message = StopSpam.config.middleware_message
+          message = StopSpam.config.ban_message
           body    = message.respond_to?(:call) ? message.(request) : message
 
           [429, {}, [body]]

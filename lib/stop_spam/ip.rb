@@ -1,15 +1,15 @@
 module StopSpam
   class IP
     include HTTParty
+    extend  Forwardable
 
     attr_reader :id
 
     base_uri 'http://us.stopforumspam.org'
     default_timeout 10
-
     format :json
 
-    delegate :config, to: :StopSpam
+    def_delegator :StopSpam, :config
 
     def initialize(id)
       @id = id
